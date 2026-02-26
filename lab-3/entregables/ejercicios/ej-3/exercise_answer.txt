@@ -1,0 +1,12 @@
+Tras realizar el entrenamiento tanto incrementalmente como desde cero, he obtenido los siguientes resultados:
+· Entrenamiento incremental ("retrain_from_scratch": false) -> 0.9615
+· Entrenamiento desde cero ("retrain_from_scratch": true) -> 1.0000
+
+Esto en principio no debe tener sentido, ya que con tan pocos datos el accuracy debería ser mucho peor, no obstante, debido a cómo el
+código está montado, el resultado tiene más sentido.
+
+En el código del endpoint /train, hay un condicional que cambia cómo se mide la precisión según el volumen de datos:
+· En el entrenamiento incremental, el código hace un train_test_split. Entrena con el 80% y se evalúa con un 20% de datos que el modelo
+nunca ha visto.
+· En el entrenamiento desde cero, el código entrena con las 10 muestras y luego se evalúa con esas mismas 10 muestras, resultando en una
+accuracy más alta.

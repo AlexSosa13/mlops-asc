@@ -1,0 +1,33 @@
+[
+  {
+    "version": "v1.0-base",
+    "trained_at": "2026-02-26T19:21:17.748309Z",
+    "accuracy": 0.9667,
+    "n_training_samples": 120,
+    "algorithm": "LogisticRegression",
+    "source": "bootstrap (iris dataset completo)",
+    "activated": true
+  },
+  {
+    "version": "v2.0-18594c",
+    "trained_at": "2026-02-26T19:21:33.988082Z",
+    "accuracy": 0.9615,
+    "n_training_samples": 130,
+    "algorithm": "LogisticRegression",
+    "source": "incremental (+10 muestras nuevas, 120 anteriores)",
+    "eval_note": "validaci\u00f3n con 26 muestras",
+    "status": "rechazado",
+    "activated": false
+  },
+  {
+    "version": "v3.0-85b71f",
+    "trained_at": "2026-02-26T19:21:52.606236Z",
+    "accuracy": 1.0,
+    "n_training_samples": 10,
+    "algorithm": "LogisticRegression",
+    "source": "desde cero (10 muestras)",
+    "eval_note": "evaluaci\u00f3n en train (dataset peque\u00f1o, < 20 muestras)",
+    "status": "activado",
+    "activated": true
+  }
+]
