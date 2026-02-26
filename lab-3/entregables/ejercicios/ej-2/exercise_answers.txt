@@ -1,0 +1,9 @@
+· ¿Cuántas versiones se han registrado?
+- Se han intentado registrar dos versiones nuevas aparte de la versión base.
+
+· ¿Qué versiones fueron activadas y cuáles rechazadas?
+- El primer intento de nueva versión, la v2.0-943d17, fue aceptada. Por otro lado, el segundo intento, la v3.0-dff79e fue rechazada.
+
+· ¿Por qué el modelo entrenado con muestras ruidosas fue rechazado?
+- Al probar ambas versiones, la segunda versión supuso una mejora frente a la versión base (1.0000 frente a 0.9667), no obstante, la tercera versión
+mostró un rendimiento más pobre que la segunda versión (0.6000 frente a 1.0000), por lo que fue rechazada.
