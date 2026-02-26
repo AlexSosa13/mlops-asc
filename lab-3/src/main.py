@@ -130,19 +130,25 @@ def bootstrap_model():
     clf.fit(X_train, y_train)
     accuracy = float(accuracy_score(y_test, clf.predict(X_test)))
 
-    version = "v1.0-base"
     joblib.dump(clf, MODEL_PATH)
 
+    data_file = MODELS_DIR / "accumulated_data.joblib"
+    joblib.dump({"X": X_train, "y": y_train}, data_file)
+
+    version = "v1.0-base"
     history = [{
         "version": version,
         "trained_at": datetime.utcnow().isoformat() + "Z",
         "accuracy": round(accuracy, 4),
         "n_training_samples": len(X_train),
         "algorithm": "LogisticRegression",
-        "source": "bootstrap (iris dataset completo)"
+        "source": "bootstrap (iris dataset completo)",
+        "activated": True
     }]
     save_history(history)
-    print(f"[bootstrap] Modelo base creado → versión={version}, accuracy={accuracy:.4f}")
+    
+    print(f"[bootstrap] Modelo base creado y datos guardados.")
+    print(f"- Versión: {version} | Accuracy: {accuracy:.4f} | Muestras: {len(X_train)}")
 
 
 # ---------------------------------------------------------------------------
