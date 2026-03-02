@@ -1,0 +1,16 @@
+1. En este caso sí, se obtendrían los mismos resultados, debido principalmente la semilla utilizada en el proceso. En primer lugar, la semilla
+se utiliza para dividir los datos de training y test, y por otro lado, se utilizan al definir la Regresión Logística para que siempre se ejecute
+de la misma manera. Esta semilla se define mediante el argumento random_state tanto en train_test_split como en LogisticRegression.
+
+2. Si lanzaramos una petición de entrenamiento a la API con datos que rompan alguna regla (sea por cantidad de muestras o clases), el sistema está
+programado para devolver un error HTTP 422 describiendo la regla que se ha incumplido, por lo que el modelo ni se entrenaría ni se activaría. Esta
+restricción tiene sentido ya que no queremos entrenar modelos con conjuntos de datos que reduzcan en gran medida la calidad del resultado.
+
+3. El motivo por el que registramos en el historial todos los modelos probados, incluyendo aquellos que no suponen una mejora, es para mantener una
+trazabilidad que nos permita observar no solo la accuracy de estos modelos sino el motivo por el que estos fueron rechazados, dándonos información
+que podría sernos útil para futuros modelos.
+
+4. En mi opinion, en esta clase de modelos es completamente acertado hacer uso de >= a la hora de decider si un modelo reemplaza a otro. Incluso aunque
+un modelo obtenga la misma accuracy que otro, el hecho de que haya sido entrenado con un número mayor de muestras que el anterior le da una mayor
+robustez y major calidad de generación que el modelo entrenado con menos muestras. Además, eventualmente, el crecimiento del modelo dara lugar a que
+la accuracy se estabilice en su punto más alto y deje de subir, por lo que un > estricto haría que el modelo deje de evolucionar.
