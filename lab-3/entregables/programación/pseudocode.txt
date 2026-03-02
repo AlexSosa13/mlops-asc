@@ -1,0 +1,40 @@
+Nota: Este pseudocódigo asume que "metricas_x" es un diccionario con la siguiente estructura:
+
+{
+    "accuracy": accuracy_num,
+    "f1": [f1_num for class in classes]
+}
+
+----------
+
+clase ActivationPolicy:
+    funcion init(modo: str, delta: num = 0, clase: num):
+        modo = modo
+        delta = delta
+        clase = clase
+
+    funcion evaluar(metricas_nuevo: dict, metricas_anterior:dict) -> (bool, str):
+        if metricas_anterior es none:
+            return (True, "No se dispone de modelo con el que comparar, introduciendo modelo base")
+
+        match modo:
+            case "any_improvement":
+                es_mejor = metricas_nuevo["accuracy"] >= metricas_anterior["accuracy"]
+                if es_mejor:
+                    return (True, "Nuevo modelo supone una mejora de accuracy frente al anterior)
+                else:
+                    return (False, "Nuevo modelo supone un deterioro de accuracy frente al anterior)
+            case "min_delta":
+                es_mejor = metricas_nuevo["accuracy"] >= metricas_anterior["accuracy"] + (delta/100)*metricas_anterior["accuracy"]
+                if es_mejor:
+                    return (True, f"Nuevo modelo supone una mejora de el {delta}% o superior en el accuracy frente al anterior)
+                else:
+                    return (False, f"Nuevo modelo no supone una mejora de el {delta}% o superior en el accuracy frente al anterior)
+            case "per_class_f1":
+                es_mejor = metricas_nuevo["f1"][clase] >= metricas_anterior["f1"][clase]
+                if es_mejor:
+                    return (True, f"Nuevo modelo supone una mejora en el F1 score para la clase {clase} frente al anterior"
+                else:
+                    return(False, f"Nuevo modelo supone un deterioro en el F1 score para la clase {clase} frente al anterior"
+            case default:
+                return (False, "La política introducida no ha sido reconocida, por favor, indique una política diferente)

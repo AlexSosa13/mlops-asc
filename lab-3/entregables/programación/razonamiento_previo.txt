@@ -1,0 +1,13 @@
+Para los tres escenarios hipotéticos presentados en el ejercicio:
+
+Escenario 1: En este primer caso, debido a que los falsos negativos son mucho más caros que los falsos positivos, es esencial que centremos el
+entrenamiento de nuestro modelo en asegurar que no se nos escape ningún fraude. Por ello, deberíamos aplicar una política que se centre en la
+mejora de la clase negativa (per_class_f1).
+
+Escenario 2: En este segundo caso, el coste de error es mucho más bajo, por ello, no tenemos que ser tan estrictos como antes a la hora de aceptar
+cambios. Nada más detectemos un modelo que suponga mejora en la accuracy, por pequeña que sea, deberíamos aceptarlo como reemplazo, aplicando
+una política más laxa (any_improvement).
+
+Escenario 3: Por último, en este caso lo más importante de nuestro sistema es la estabilidad y previsibilidad de el comportamiento de nuestro modelo,
+no pudiendo arriesgar a reemplazarlo al detectar cambios pequeños en la accuracy. Por ello, aplicariamos una política de mejora más estricta que
+únicamente considere reemplazar el modelo si este supone una mejora significativa en la accuracy de nuestras predicciones (min_delta).
