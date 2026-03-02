@@ -136,7 +136,13 @@ def step_predict(host):
 def step_train_good(host):
     sep("PASO 2 – Reentrenamiento con muestras CORRECTAS")
     info(f"Enviando {len(GOOD_SAMPLES)} muestras bien etiquetadas...")
-    result = post(host, "/train", {"samples": GOOD_SAMPLES, "retrain_from_scratch": False})
+    # Añado explícitamente la política deseada
+    payload = {
+        "samples": GOOD_SAMPLES, 
+        "retrain_from_scratch": False,
+        "activation_mode": "any_improvement"
+    }
+    result = post(host, "/train", payload)
 
     if result["model_updated"]:
         ok(f"Nuevo modelo ACTIVADO → versión: {result['model_version']}")
@@ -151,7 +157,13 @@ def step_train_good(host):
 def step_train_noisy(host):
     sep("PASO 3 – Reentrenamiento con muestras RUIDOSAS (etiquetas incorrectas)")
     info(f"Enviando {len(NOISY_SAMPLES)} muestras con etiquetas erróneas...")
-    result = post(host, "/train", {"samples": NOISY_SAMPLES, "retrain_from_scratch": True})
+    # Añado explícitamente la política deseada
+    payload = {
+        "samples": NOISY_SAMPLES, 
+        "retrain_from_scratch": True,
+        "activation_mode": "any_improvement"
+    }
+    result = post(host, "/train", payload)
 
     if result["model_updated"]:
         warn(f"Modelo activado igualmente (accuracy similar o mayor). "

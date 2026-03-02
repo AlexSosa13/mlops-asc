@@ -22,7 +22,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import train_test_split
 
 # ---------------------------------------------------------------------------
@@ -34,6 +34,42 @@ MODELS_DIR.mkdir(exist_ok=True)
 
 MODEL_PATH = MODELS_DIR / "model_active.joblib"
 HISTORY_PATH = MODELS_DIR / "training_history.json"
+
+# ---------------------------------------------------------------------------
+# Clase de Política
+# ---------------------------------------------------------------------------
+
+class ActivationPolicy:
+    def __init__(self, modo: str, delta: float = 0, clase: int = 0):
+        self.modo = modo
+        self.delta = delta
+        self.clase = clase
+
+    def evaluar(self, metricas_nuevo: dict, metricas_anterior: dict) -> tuple:
+        if metricas_anterior is None:
+            return (True, "No se dispone de modelo con el que comparar, introduciendo modelo base")
+
+        match self.modo:
+            case "any_improvement":
+                es_mejor = metricas_nuevo["accuracy"] >= metricas_anterior["accuracy"]
+                if es_mejor:
+                    return (True, "Nuevo modelo supone una mejora de accuracy frente al anterior")
+                else:
+                    return (False, "Nuevo modelo supone un deterioro de accuracy frente al anterior")
+            case "min_delta":
+                es_mejor = metricas_nuevo["accuracy"] >= metricas_anterior["accuracy"] + (self.delta/100)*metricas_anterior["accuracy"]
+                if es_mejor:
+                    return (True, f"Nuevo modelo supone una mejora de el {self.delta}% o superior en el accuracy frente al anterior")
+                else:
+                    return (False, f"Nuevo modelo no supone una mejora de el {self.delta}% o superior en el accuracy frente al anterior")
+            case "per_class_f1":
+                es_mejor = metricas_nuevo["f1"][self.clase] >= metricas_anterior["f1"][self.clase]
+                if es_mejor:
+                    return (True, f"Nuevo modelo supone una mejora en el F1 score para la clase {self.clase} frente al anterior")
+                else:
+                    return(False, f"Nuevo modelo supone un deterioro en el F1 score para la clase {self.clase} frente al anterior")
+            case _:
+                return (False, "La política introducida no ha sido reconocida, por favor, indique una política diferente")
 
 # ---------------------------------------------------------------------------
 # Esquemas Pydantic
@@ -64,6 +100,9 @@ class TrainRequest(BaseModel):
         False,
         description="Si True, ignora datos anteriores y entrena solo con las muestras enviadas"
     )
+    activation_mode: str = "any_improvement"
+    delta: float = 0.0
+    clase: int = 0
 
 
 class PredictResponse(BaseModel):
@@ -128,7 +167,10 @@ def bootstrap_model():
     )
     clf = LogisticRegression(max_iter=200, random_state=42)
     clf.fit(X_train, y_train)
-    accuracy = float(accuracy_score(y_test, clf.predict(X_test)))
+    y_pred = clf.predict(X_test)
+    accuracy = float(accuracy_score(y_test, y_pred))
+    # Cálculo de f1 inicial para permitir futuras comparaciones
+    f1_vals = f1_score(y_test, y_pred, average=None, labels=[0,1,2]).tolist()
 
     joblib.dump(clf, MODEL_PATH)
 
@@ -140,6 +182,7 @@ def bootstrap_model():
         "version": version,
         "trained_at": datetime.utcnow().isoformat() + "Z",
         "accuracy": round(accuracy, 4),
+        "metrics": {"accuracy": round(accuracy, 4), "f1": f1_vals},
         "n_training_samples": len(X_train),
         "algorithm": "LogisticRegression",
         "source": "bootstrap (iris dataset completo)",
@@ -224,7 +267,7 @@ def train(request: TrainRequest):
     - Si `retrain_from_scratch=False` (por defecto), las nuevas muestras se añaden
       al dataset de entrenamiento anterior (si existe) y se reentrena sobre el total.
     - Si `retrain_from_scratch=True`, solo se usan las muestras enviadas.
-    - El nuevo modelo **reemplaza al activo solo si su accuracy ≥ accuracy anterior**.
+    - El nuevo modelo **reemplaza al activo dependiendo de el activation mode indicado**.
     - Cada entrenamiento queda registrado en el historial aunque no se active.
     """
 
@@ -235,7 +278,9 @@ def train(request: TrainRequest):
 
     # 2. Recuperar accuracy del modelo activo
     history = load_history()
-    previous_accuracy = history[-1]["accuracy"] if history else None
+    previous_meta = history[-1] if history else None
+    previous_accuracy = previous_meta["accuracy"] if previous_meta else None
+    metricas_anterior = previous_meta.get("metrics") if previous_meta else None
 
     # 3. Construir dataset de entrenamiento
     data_file = MODELS_DIR / "accumulated_data.joblib"
@@ -265,17 +310,23 @@ def train(request: TrainRequest):
             X_train, y_train, test_size=0.2, random_state=42
         )
         clf_new.fit(X_tr, y_tr)
-        accuracy_new = float(accuracy_score(y_val, clf_new.predict(X_val)))
+        y_pred_val = clf_new.predict(X_val)
+        accuracy_new = float(accuracy_score(y_val, y_pred_val))
+        f1_new = f1_score(y_val, y_pred_val, average=None, labels=[0,1,2]).tolist()
         eval_note = f"validación con {len(X_val)} muestras"
     else:
         clf_new.fit(X_train, y_train)
-        accuracy_new = float(accuracy_score(y_train, clf_new.predict(X_train)))
+        y_pred_val = clf_new.predict(X_train)
+        accuracy_new = float(accuracy_score(y_train, y_pred_val))
+        f1_new = f1_score(y_train, y_pred_val, average=None, labels=[0,1,2]).tolist()
         eval_note = "evaluación en train (dataset pequeño, < 20 muestras)"
 
     accuracy_new = round(accuracy_new, 4)
+    metricas_nuevo = {"accuracy": accuracy_new, "f1": f1_new}
 
-    # 6. Decidir si activar el nuevo modelo
-    model_updated = (previous_accuracy is None) or (accuracy_new >= previous_accuracy)
+    # 6. Decidir si activar el nuevo modelo (Usando ActivationPolicy)
+    policy = ActivationPolicy(modo=request.activation_mode, delta=request.delta, clase=request.clase)
+    model_updated, message = policy.evaluar(metricas_nuevo, metricas_anterior)
 
     version = f"v{len(history) + 1}.0-{uuid.uuid4().hex[:6]}"
     status = "activado" if model_updated else "rechazado"
@@ -283,21 +334,13 @@ def train(request: TrainRequest):
     if model_updated:
         joblib.dump(clf_new, MODEL_PATH)
         joblib.dump({"X": X_train, "y": y_train}, data_file)
-        message = (
-            f"Nuevo modelo activado. Accuracy {accuracy_new:.4f} "
-            f"{'(primer modelo)' if previous_accuracy is None else f'>= anterior ({previous_accuracy:.4f})'}"
-        )
-    else:
-        message = (
-            f"Modelo NO activado. Accuracy {accuracy_new:.4f} < anterior ({previous_accuracy:.4f}). "
-            "El modelo activo se mantiene sin cambios."
-        )
-
+    
     # 7. Registrar en historial
     history.append({
         "version": version,
         "trained_at": datetime.utcnow().isoformat() + "Z",
         "accuracy": accuracy_new,
+        "metrics": metricas_nuevo,
         "n_training_samples": len(X_train),
         "algorithm": "LogisticRegression",
         "source": source,
