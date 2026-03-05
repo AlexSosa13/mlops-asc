@@ -1,7 +1,7 @@
 [
   {
     "version": "v1.0-base",
-    "trained_at": "2026-03-05T16:06:00.306412Z",
+    "trained_at": "2026-03-05T16:17:03.509200Z",
     "accuracy": 0.9667,
     "metrics": {
       "accuracy": 0.9667,
@@ -17,27 +17,27 @@
     "activated": true
   },
   {
-    "version": "v2.0-b36694",
-    "trained_at": "2026-03-05T16:09:03.575192Z",
-    "accuracy": 0.9231,
+    "version": "v2.0-01fde2",
+    "trained_at": "2026-03-05T16:17:12.099223Z",
+    "accuracy": 1.0,
     "metrics": {
-      "accuracy": 0.9231,
+      "accuracy": 1.0,
       "f1": [
-        0.875,
-        0.9411764705882353,
-        0.9473684210526315
+        1.0,
+        1.0,
+        1.0
       ]
     },
-    "n_training_samples": 130,
+    "n_training_samples": 140,
     "algorithm": "LogisticRegression",
-    "source": "incremental (+10 muestras nuevas, 120 anteriores)",
-    "eval_note": "validaci\u00f3n con 26 muestras",
-    "status": "rechazado",
-    "activated": false
+    "source": "incremental (+20 muestras nuevas, 120 anteriores)",
+    "eval_note": "validaci\u00f3n con 28 muestras",
+    "status": "activado",
+    "activated": true
   },
   {
-    "version": "v3.0-3404ff",
-    "trained_at": "2026-03-05T16:09:15.767471Z",
+    "version": "v3.0-e90666",
+    "trained_at": "2026-03-05T16:17:12.113740Z",
     "accuracy": 0.6,
     "metrics": {
       "accuracy": 0.6,
@@ -53,24 +53,5 @@
     "eval_note": "evaluaci\u00f3n en train (dataset peque\u00f1o, < 20 muestras)",
     "status": "rechazado",
     "activated": false
-  },
-  {
-    "version": "v4.0-f82bce",
-    "trained_at": "2026-03-05T16:09:56.768204Z",
-    "accuracy": 0.9615,
-    "metrics": {
-      "accuracy": 0.9615,
-      "f1": [
-        1.0,
-        0.9333333333333333,
-        0.9523809523809523
-      ]
-    },
-    "n_training_samples": 130,
-    "algorithm": "LogisticRegression",
-    "source": "incremental (+10 muestras nuevas, 120 anteriores)",
-    "eval_note": "validaci\u00f3n con 26 muestras",
-    "status": "activado",
-    "activated": true
   }
 ]
