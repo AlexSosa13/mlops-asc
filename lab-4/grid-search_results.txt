@@ -1,0 +1,17 @@
+=== SELECCIÓN DE LOS MEJORES MODELOS (Criterio: Mayor Recall) ===
+
+🏆 Puesto 1:
+Parámetros: n_estimators=200, max_depth=10, min_samples=2
+Métricas  -> Recall: 0.5926 | F1: 0.6214 | Accuracy: 0.7468
+Successfully registered model 'Diabetes_RF_Model'.
+2026/03/07 09:16:13 WARNING mlflow.tracking._model_registry.fluent: Run with id 30ed160788a44bd8b5c0405d03746cd6 has no artifacts at artifact path 'model', registering model based on models:/m-a229908c235147d4a1f3baa3cf509b57 instead
+Created version '1' of model 'Diabetes_RF_Model'.
+✅ Registrado como 'Diabetes_RF_Model' (Versión 1) con Alias: 'champion'
+
+🏆 Puesto 2:
+Parámetros: n_estimators=200, max_depth=None, min_samples=2
+Métricas  -> Recall: 0.5741 | F1: 0.6139 | Accuracy: 0.7468
+Registered model 'Diabetes_RF_Model' already exists. Creating a new version of this model...
+2026/03/07 09:16:13 WARNING mlflow.tracking._model_registry.fluent: Run with id 9c54ae79da784252a4061edd9ff3acaf has no artifacts at artifact path 'model', registering model based on models:/m-eb1de98503cd4f149b0ef32ac2a2f77f instead
+Created version '2' of model 'Diabetes_RF_Model'.
+✅ Registrado como 'Diabetes_RF_Model' (Versión 2) con Alias: 'staging'
