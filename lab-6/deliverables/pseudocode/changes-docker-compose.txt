@@ -1,0 +1,18 @@
+services:
+  backend:
+    // ... configuración normal ...
+    
+    // DEFINICIÓN DEL HEALTHCHECK
+    healthcheck:
+      test: Hacer una petición web a "http://localhost:8000/health"
+      interval: Esperar 5 segundos entre intentos
+      timeout: Rendirse si la petición tarda más de 3 segundos
+      retries: Intentarlo hasta 10 veces antes de declarar fallo total
+
+  frontend:
+    // ... configuración normal ...
+    
+    // DEPENDENCIA CONDICIONADA
+    depends_on:
+      backend:
+        condition: service_healthy  // ¡La clave! Esperar a que el healthcheck pase

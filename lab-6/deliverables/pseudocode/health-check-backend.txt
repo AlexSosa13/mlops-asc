@@ -1,0 +1,15 @@
+// ESTADO GLOBAL
+variable modelo_cargado = FALSO
+
+// TAREA EN SEGUNDO PLANO (Al arrancar el servidor)
+FUNCION cargar_modelo_asincrono():
+    descargar_modelo_de_red()
+    cargar_modelo_en_memoria()
+    modelo_cargado = VERDADERO
+
+// ENDPOINT DE VERIFICACIÓN
+RUTA GET "/health":
+    SI modelo_cargado es VERDADERO:
+        DEVOLVER HTTP 200 (OK - "Listo para inferencia")
+    SINO:
+        DEVOLVER HTTP 503 (Servicio no disponible - "Cargando modelo...")
